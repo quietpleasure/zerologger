@@ -8,23 +8,20 @@ import (
 )
 
 type Hook struct {
-	hooker hooker
+	Hooker hooker
 }
 
 type hooker interface {
 	SendLog(ctx context.Context, ts time.Time, lvl string, msg []byte) error
 }
 
-func (h Hook) Run(e *zerolog.Event, lvl zerolog.Level, msg string) {
-	h.sendLog(time.Now(), lvl.String(), []byte(msg))
-
-}
-
-func (h Hook) sendLog(ts time.Time, lvl string, msg []byte) error {
-	return h.hooker.SendLog(
-		context.TODO(),
-		ts,
-		lvl,
-		msg,
-	)
+func (h *Hook) Run(e *zerolog.Event, lvl zerolog.Level, msg string) {
+	if err := h.Hooker.SendLog(
+		context.Background(),
+		time.Now(),
+		lvl.String(),
+		[]byte(msg),
+	); err != nil {
+		e.Err(err).Msg("hook send log")
+	}
 }
