@@ -52,11 +52,12 @@ func (h *Hook) Run(e *zerolog.Event, lvl zerolog.Level, msg string) {
 	e.Fields(func(key string, value interface{}) {
 		fields[key] = fmt.Sprintf("%v", value)
 	})
+	fmt.Printf("FIELDS: %v\n", fields)
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(fields); err != nil {
 		e.Err(err).Msg("hook encode fields")
 	}
-	fmt.Println("FIELDS:", buf.String())
+	// fmt.Println("FIELDS:", buf.String())
 	// Add predefined properties
 	// for _, prop := range appInsightsProperties {
 	// 	if value, ok := e.Context[prop].(string); ok {
