@@ -1,7 +1,6 @@
 package zerologger
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
