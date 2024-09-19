@@ -1,10 +1,10 @@
 package zerologger
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -48,34 +48,16 @@ buf, err := zapcore.NewJSONEncoder(cfg).EncodeEntry(en, fields)
 	}
 */
 func (h *Hook) Run(e *zerolog.Event, lvl zerolog.Level, msg string) {
-	fields := make(map[string]any)
-	e.Fields(func(key string, value interface{}) {
-		fields[key] = fmt.Sprintf("%v", value)
-	})
 
-	// Add predefined properties
-	for _, prop := range appInsightsProperties {
-		if value, ok := e.GetCtx().Value(prop).(string); ok {
-			fields[prop] = value
-		}
-	}
+	logData := make(map[string]interface{})
+	// create a string that appends } to the end of the buf variable you access via reflection
+	ev := fmt.Sprintf("%s}", reflect.ValueOf(e).Elem().FieldByName("buf"))
+	json.Unmarshal([]byte(ev), &logData)
 
-	fmt.Printf("FIELDS: %v\n", fields)
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(fields); err != nil {
-		e.Err(err).Msg("hook encode fields")
-	}
-	// fmt.Println("FIELDS:", buf.String())
-	// Add predefined properties
-	// for _, prop := range appInsightsProperties {
-	// 	if value, ok := e.Context[prop].(string); ok {
-	// 		telemetry.Properties[prop] = value
-	// 	}
-	// }
-	// buf, err := zapcore.NewJSONEncoder(cfg).EncodeEntry(en, fields)
-	// if err != nil {
-	// 	return err
-	// }
+	// now you can either access a map of the data (logData) or string of the data (ev)
+
+	fmt.Printf("FIELDS: %v\n", logData)
+
 	// type log struct {
 	// 	Timestamp string `json:"ts"`
 	// 	Message   string `json:"msg"`
