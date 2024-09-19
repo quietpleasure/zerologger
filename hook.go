@@ -18,18 +18,18 @@ type hooker interface {
 	SendLog(ctx context.Context, ts time.Time, lvl string, msg []byte) error
 }
 
-// var appInsightsProperties []string = []string{
-// 	"database",
-// 	"host",
-// 	"port",
-// 	"module",
-// 	"pid",
-// 	"name",
-// 	"alreadyPrepared",
-// 	"args",
-// 	"sql",
-// 	"commandTag",
-// }
+var appInsightsProperties []string = []string{
+	"database",
+	"host",
+	"port",
+	"module",
+	"pid",
+	"name",
+	"alreadyPrepared",
+	"args",
+	"sql",
+	"commandTag",
+}
 
 /*
 buf, err := zapcore.NewJSONEncoder(cfg).EncodeEntry(en, fields)
@@ -52,6 +52,14 @@ func (h *Hook) Run(e *zerolog.Event, lvl zerolog.Level, msg string) {
 	e.Fields(func(key string, value interface{}) {
 		fields[key] = fmt.Sprintf("%v", value)
 	})
+
+	// Add predefined properties
+	for _, prop := range appInsightsProperties {
+		if value, ok := e.GetCtx().Value(prop).(string); ok {
+			fields[prop] = value
+		}
+	}
+
 	fmt.Printf("FIELDS: %v\n", fields)
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(fields); err != nil {
